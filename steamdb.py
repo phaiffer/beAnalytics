@@ -8,9 +8,10 @@ options =  webdriver.ChromeOptions()
 options.add_experimental_option("prefs",{"download.propmt_for_download": False})
 driver = webdriver.Chrome(options=options)
 
-# Passando a URL que esta com as informações que precisamos captar
+# Passando a URL que esta com as informações que precisamos captar.
 driver.get("https://steamdb.info/sales/")
 
+# ajustando o html para UTF-8 e deixando ele melhor para a leitura e captação de dados.
 html = driver.page_source.encode("utf-8")
 soup = BeautifulSoup(html, "lxml")
 results = []
@@ -18,9 +19,7 @@ results = []
 # for para pegas as informações da table e inserir no lxml
 for row in soup.find_all("tr")[1:]:
     data = row.find_all("td")
-    id = data[0].text
-    logo = data[1].text
-    name = data[2].text
+    name = data[2].find("a").text
     discount = data[3].text
     price = data[4].text
     rating = data[5].text
@@ -30,26 +29,29 @@ for row in soup.find_all("tr")[1:]:
 
     results.append(
         {
-            "Id": id,
-            "Logo": logo,
             "Name": name,
             "Discount": discount,
             "Price": price,
             "Rating": rating,
             "Release": release,
             "Ends": ends,
-            "Started": started
+            "Started": started,
         }
     )
 
-# Criar o DataFrame com os resultados do que foi captado na pesquisa.
+# Criando o DataFrame com os resultados do que foi captado na pesquisa.
 df = pd.DataFrame(results)
 
-# Defina o ID do projeto do Google Cloud
+# project_id do Google Cloud
 project_id = "processo-seletivo-beanalytics"
 
-# Defina o ID completo da tabela de destino (incluindo o ID do dataset)
+# table_id de destino (incluindo o conjunto de dados(dataset))
 table_id = "steamdb.tb_sales"
 
-# Exporte o DataFrame para o BigQuery
-gbq.to_gbq(df, if_exists="replace", destination_table=table_id, project_id=project_id)
+# Exportando o DataFrame para o BigQuery
+gbq.to_gbq(
+    df, 
+    if_exists="replace", 
+    destination_table=table_id, 
+    project_id=project_id
+    )
