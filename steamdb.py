@@ -55,3 +55,5 @@ gbq.to_gbq(
     destination_table=table_id, 
     project_id=project_id
     )
+
+#demostração de commit para o Lucas Kalell
